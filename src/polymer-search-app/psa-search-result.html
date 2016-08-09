@@ -1,0 +1,95 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="psa-constants.html">
+<link rel="import" href="psa-utilities.html">
+
+<dom-module id="psa-search-result">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <psa-constants></psa-constants>
+    <psa-utilities id="utilities"></psa-utilities>
+
+    <h3><a href="[[result.view_uri]]" ctype="c">[[result.allTitle]]</a></h3>
+    <div class="psa-search-result__meta">
+
+      <template is="dom-if" if="[[result.requires_subscription]]">
+        <span aria-hidden="true" title="Subscription Required" class="icon-key subscription-required"></span>
+      </template>
+
+      <template is="dom-if" if="[[computeElevated(result)]]">
+        <span aria-hidden="true" class="icon-check-alt"></span>
+        <strong>[[localize('Recommended')]]</strong>
+      </template>
+
+      <span>[[computeTypeMap(result.documentKind)]]</span>
+
+      <!-- <template is="dom-if" if="[[!computeDocumentKind(result.documentKind, 'Documentation')]]"> -->
+        &mdash;&nbsp;<time datetime="{{result.lastModifiedDate}}">[[computeDate(result.lastModifiedDate)]]</time>
+      <!-- </template> -->
+    </div>
+    <div inner-h-t-m-l="[[computeExcerpt(excerpt)]]"></div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-search-result',
+
+      behaviors: [
+        Polymer.AppLocalizeBehavior
+      ],
+
+      properties: {
+        language: {
+          type: String,
+          value: 'en'
+        }
+      },
+
+      ready: function () {
+        this.language = new Polymer.IronMetaQuery({ key: 'LANGUAGE' }).value;
+      },
+
+      attached: function () {
+        this.loadResources(this.resolveUrl('./locales.json'));
+      },
+
+      computeExcerpt: function(excerpt) {
+        return this.$.utilities.truncate(this.$.utilities.replacehex(excerpt), 256);
+      },
+
+      computeElevated: function(result) {
+        return result['[elevated]'];
+      },
+
+      computeDocumentKind: function (documentKind, comparator) {
+        return documentKind === comparator;
+      },
+
+      computeTypeMap: function (documentKind) {
+        var contentTypeMap = {
+          'Documentation': 'Product Documentation',
+          'LabInfo': 'Red Hat Access Labs',
+          'Isos': 'Downloads'
+        };
+
+        return contentTypeMap[documentKind] || documentKind;
+      },
+
+      computeDate: function (date) {
+        var language = new Polymer.IronMetaQuery({ key: 'LANGUAGE' }).value;
+        var formattedDate = new Intl.DateTimeFormat(language, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(new Date(date));
+
+        return formattedDate;
+      }
+    });
+  </script>
+</dom-module>

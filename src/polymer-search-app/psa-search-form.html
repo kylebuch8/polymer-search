@@ -1,0 +1,53 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="psa-constants.html">
+
+<dom-module id="psa-search-form">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <psa-constants></psa-constants>
+
+    <form is="iron-form" on-iron-form-presubmit="handleSubmit">
+      <input id="input" type="search" name="search" placeholder="[[localize('Keyword')]]" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="{{queryParams.query}}">
+      <button class="btn btn-primary" type="submit">[[localize('Search')]]</button>
+    </form>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-search-form',
+
+      behaviors: [
+        Polymer.AppLocalizeBehavior
+      ],
+
+      properties: {
+        language: {
+          type: String,
+          value: 'en'
+        }
+      },
+
+      ready: function () {
+        this.language = new Polymer.IronMetaQuery({ key: 'LANGUAGE' }).value;
+      },
+
+      attached: function () {
+        this.loadResources(this.resolveUrl('./locales.json'));
+      },
+
+      handleSubmit: function (evt) {
+        evt.preventDefault();
+
+        this.set('queryParams.query', this.$.input.value);
+        this.$.input.blur();
+      }
+    });
+  </script>
+</dom-module>

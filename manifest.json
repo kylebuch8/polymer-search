@@ -1,0 +1,6 @@
+{
+  "name": "polymer-search",
+  "short_name": "polymer-search",
+  "start_url": "/",
+  "display": "standalone"
+}

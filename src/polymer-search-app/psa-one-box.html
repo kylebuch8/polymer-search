@@ -1,0 +1,90 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="psa-one-box">
+  <template>
+    <iron-ajax
+      auto
+      url="https://crossorigin.me/https://access.redhat.com/webassets/avalon/j/search/one-box.json"
+      handle-as="json"
+      on-response="handleResponse"
+      last-response="{{response}}"></iron-ajax>
+
+    <div>
+      <h2>[[rule.product]]</h2>
+      <template is="dom-if" if="[[rule.description]]">
+        <p>[[rule.description]]</p>
+      </template>
+      <template is="dom-if" if="[[rule.links.info]]">
+        <ul>
+          <template is="dom-repeat" items="[[rule.links.info]]">
+            <li><a href="[[item.link]]">[[item.text]]</a></li>
+          </template>
+        </ul>
+      </template>
+      <template is="dom-if" if="[[rule.links.knowledgebase]]">
+        <p><strong>Browse Product Knowledge</strong></p>
+        <ul>
+          <template is="dom-repeat" items="[[rule.links.knowledgebase]]">
+            <li><a href="[[item.link]]">[[item.text]]</a></li>
+          </template>
+        </ul>
+      </template>
+    </div>
+
+    <div>
+      About [[rule.product]]
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-one-box',
+
+      properties: {
+        rule: {
+          type: Object,
+          notify: true,
+          value: null
+        }
+      },
+
+      observers: [
+        'findRuleMatches(query)'
+      ],
+
+      handleResponse: function () {
+        this.findRuleMatches(this.query);
+      },
+
+      findRuleMatches: function (query) {
+        if (!query || !this.response) {
+          return;
+        }
+
+        var rules = this.response.rules;
+        var i = 0;
+        var j = 0;
+        var match = false;
+
+        for (i; i < rules.length; i += 1) {
+          var rule = rules[i];
+          var length = rule.keywords.length;
+
+          j = 0;
+          for (j; j < length; j += 1) {
+            if (query.indexOf(rule.keywords[j]) > -1) {
+              this.rule = rule;
+              match = true;
+              break;
+            }
+          }
+        }
+
+        if (!match) {
+          this.rule = null;
+        }
+      }
+    });
+  </script>
+</dom-module>

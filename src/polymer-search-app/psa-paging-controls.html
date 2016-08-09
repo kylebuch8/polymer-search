@@ -1,0 +1,26 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="psa-paging-controls">
+  <template>
+    <ul>
+      <template is="dom-repeat" items="[[pageRange]]">
+        <li><a href="" class$="{{computeActive(item, currentPage)}}" data-page-number$="{{item}}" on-tap="updatePage">[[item]]</a></li>
+      </template>
+    </ul>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-paging-controls',
+
+      computeActive: function (index, currentPage) {
+        return (index === parseInt(currentPage, 10)) ? 'active' : '';
+      },
+
+      updatePage: function(evt) {
+        var pageNumber = evt.target.getAttribute('data-page-number');
+        this.set('queryParams.page', pageNumber);
+      }
+    });
+  </script>
+</dom-module>

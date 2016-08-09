@@ -1,0 +1,87 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="psa-constants.html">
+<link rel="import" href="psa-search-result.html">
+<link rel="import" href="psa-paging-controls.html">
+
+<dom-module id="psa-search-results">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <psa-constants></psa-constants>
+
+    <template is="dom-if" if="[[results.responseHeader.params.q]]">
+      <div class="psa-search-results__displaying-results">
+        <p inner-h-t-m-l="[[localize('DisplayingResultsFound', 'query', results.responseHeader.params.q, 'lang', language)]]"></p>
+      </div>
+    </template>
+
+    <template is="dom-if" if="[[computeNoResults(results)]]">
+      <div class="psa-search-results__displaying-results">
+        <p>[[localize('NoResultsFound')]]</p>
+      </div>
+    </template>
+
+    <template is="dom-repeat" items="[[results.response.docs]]">
+      <psa-search-result result="[[item]]" excerpt="[[computeExcerpt(item.uri, item.abstract)]]"></psa-search-result>
+    </template>
+
+    <!-- <template is="dom-if" if="[[computeShowPagingControls(results)]]">
+      <psa-paging-controls current-page="[[currentPage]]" query-params="{{queryParams}}" page-range="{{pageRange}}"></psa-paging-controls>
+    </template> -->
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-search-results',
+
+      behaviors: [
+        Polymer.AppLocalizeBehavior
+      ],
+
+      properties: {
+        language: {
+          type: String,
+          value: 'en'
+        }
+      },
+
+      ready: function () {
+        this.language = new Polymer.IronMetaQuery({ key: 'LANGUAGE' }).value;
+      },
+
+      attached: function () {
+        this.loadResources(this.resolveUrl('./locales.json'));
+      },
+
+      computeNoResults: function (results) {
+        try {
+          return results.responseHeader.params.q && !results.response.docs.length;
+        } catch (e) {
+          return false;
+        }
+      },
+
+      computeExcerpt: function (uri, abstract) {
+        if (!this.results.highlighting[uri].abstract) {
+          return abstract;
+        }
+
+        return this.results.highlighting[uri].abstract[0];
+      },
+
+      computeShowPagingControls: function (results) {
+        if (!results.response) {
+          return;
+        }
+
+        return results.response.numFound > results.responseHeader.params.rows;
+      }
+    });
+  </script>
+</dom-module>

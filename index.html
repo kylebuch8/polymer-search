@@ -1,0 +1,231 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>Red Hat Customer Portal - Search</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1,user-scalable=yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="import" href="src/polymer-search-app/polymer-search-app.html">
+    <script async src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Intl.~locale.en,Intl.~locale.es,Intl.~locale.de,Intl.~locale.it,Intl.~locale.ko,Intl.~locale.fr,Intl.~locale.ja,Intl.~locale.pt,Intl.~locale.zh,Intl.~locale.ru"></script>
+    <script async src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <style>
+      html,body {
+        margin: 0;
+        font-family: 'Helvetica';
+      }
+
+      psa-search-form {
+        background: #f0f0f0;
+        padding: 16px;
+      }
+
+      psa-search-form form {
+        display: -webkit-flex;
+        display: flex;
+      }
+
+      psa-search-form input {
+        -webkit-appearance: none;
+        margin: 0;
+        padding-left: 4px;
+        background: white;
+        border: 1px solid #d2d3d4;
+        font-size: 16px;
+        border-radius: 0;
+        -webkit-flex: 1;
+        flex: 1;
+      }
+
+      psa-search-result {
+        margin: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #ececec;
+      }
+
+      psa-search-result h3 {
+        font-weight: 100;
+        margin: 0 0 4px 0;
+      }
+
+      .psa-search-result__meta {
+        font-size: 14px;
+        color: #767676;
+        margin-bottom: 8px;
+      }
+
+      psa-paging-controls {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: center;
+        justify-content: center;
+        padding: 16px;
+      }
+
+      psa-paging-controls ul {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      psa-paging-controls ul li a {
+        display: block;
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        margin-left: -1px;
+      }
+
+      psa-paging-controls ul li a:hover {
+        color: #23527c;
+        background-color: #eee;
+        border-color: #ddd;
+      }
+
+      psa-paging-controls ul li a.active {
+        color: #fff;
+        background-color: #0088ce;
+        border-color: #0088ce;
+      }
+
+      nav {
+        height: 56px;
+        background: black;
+      }
+
+      nav h1 {
+        line-height: 56px;
+        margin: 0;
+        color: #efefef;
+        padding: 0 16px;
+        font-weight: 100;
+        font-size: 20px;
+      }
+
+      main {
+        font-size: 16px;
+        color: #333;
+      }
+
+      a:link,
+      a:visited {
+        color: #0088ce;
+        text-decoration: none;
+      }
+
+      mark {
+        background-color: #fcf8e3;
+        padding: 0.2em;
+      }
+
+      .btn.btn-primary {
+        background: #c00;
+        margin: 0;
+        padding: 7px 20px;
+        border-color: #c00;
+        color: #fff;
+        text-transform: uppercase;
+        border-style: solid;
+      }
+
+      .psa-search-results__displaying-results {
+        padding: 0 16px;
+      }
+
+      psa-loading {
+        background: rgba(0, 0, 0, 0.1);
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        margin-left: -36px;
+        margin-top: -36px;
+        padding: 16px;
+        border-radius: 2px;
+        z-index: 9999;
+      }
+
+      @-webkit-keyframes rotation {
+        from {
+          -webkit-transform: rotate(0deg)
+        }
+
+        to {
+          -webkit-transform: rotate(359deg)
+        }
+      }
+
+      @keyframes rotation {
+        from {
+          transform: rotate(0deg)
+        }
+
+        to {
+          transform: rotate(359deg)
+        }
+      }
+
+      .spinner {
+        -webkit-animation: rotation 0.6s infinite linear;
+        -o-animation: rotation 0.6s infinite linear;
+        animation: rotation 0.6s infinite linear;
+        border-bottom: 4px solid rgba(0,0,0,0.25);
+        border-left: 4px solid rgba(0,0,0,0.25);
+        border-right: 4px solid rgba(0,0,0,0.25);
+        border-top: 4px solid rgba(0,0,0,0.75);
+        -moz-border-radius: 100%;
+        -webkit-border-radius: 100%;
+        border-radius: 100%;
+        margin: 0 auto;
+        position: relative;
+        display: block;
+        height: 32px;
+        height: 2rem;
+        width: 32px;
+        width: 2rem
+      }
+
+      @media (min-width: 768px) {
+        .results {
+          display: -webkit-flex;
+          display: flex;
+        }
+
+        psa-one-box {
+          width: 25%;
+          min-width: 225px;
+          order: 2;
+          margin-top: 16px;
+        }
+
+        psa-one-box > div {
+          border: 1px solid #ececec;
+          padding: 16px;
+        }
+
+        psa-search-results {
+          width: 75%;
+          margin-right: 16px;
+        }
+      }
+
+      @media (min-width: 992px) {
+        psa-search-results,
+        psa-search-form form {
+          max-width: 65%;
+        }
+      }
+    </style>
+  </head>
+  <body unresolved>
+    <header>
+      <nav>
+        <h1>Polymer Search App</h1>
+      </nav>
+    </header>
+
+    <polymer-search-app></polymer-search-app>
+  </body>
+</html>

@@ -1,0 +1,121 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="psa-constants.html">
+
+<dom-module id="psa-search-service">
+  <template>
+    <psa-constants></psa-constants>
+
+    <iron-ajax
+      auto
+      id="xhr"
+      headers='{"Accept": "application/vnd.redhat.solr+json"}'
+      handle-as="json"
+      on-response="handleResponse"
+      loading="{{loading}}"
+      last-response="{{results}}"
+      debounce-duration="300"></iron-ajax>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-search-service',
+
+      properties: {
+        results: {
+          type: Object,
+          notify: true,
+          value: {}
+        },
+        loading: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        currentPage: {
+          type: Number,
+          notify: true,
+          value: 1
+        },
+        pageRange: {
+          type: Array,
+          notify: true,
+          value: []
+        },
+        rows: {
+          type: Number,
+          value: 10
+        },
+        language: {
+          type: String,
+          value: 'en'
+        }
+      },
+
+      observers: [
+        'search(queryParams.*)'
+      ],
+
+      ready: function () {
+        this.language = new Polymer.IronMetaQuery({ key: "LANGUAGE" }).value;
+      },
+
+      search: function (queryParams) {
+        if (!queryParams.base.query) {
+          return;
+        }
+
+        if (this.query !== queryParams.base.query) {
+          this.set('queryParams.page', 1);
+        }
+
+        var start = (queryParams.base.page - 1 || 0) * this.rows;
+
+        this.loading = true;
+        this.query = queryParams.base.query;
+        this.currentPage = queryParams.base.page || 1;
+
+        this.$.xhr.params = {
+          'q': this.query,
+          'rows': this.rows,
+          'start': start,
+          'fq': 'language:(' + this.language + ')',
+          'hl': true,
+          'hl.fl': 'abstract',
+          'hl.simple.pre': '%3Cmark%3E',
+          'hl.simple.post': '%3C%2Fmark%3E',
+          'enableElevation': true
+        };
+        this.$.xhr.url = 'https://api.access.redhat.com/rs/search';
+      },
+
+      handleResponse: function (evt, request) {
+        var response = evt.detail.response;
+
+        if (!response) {
+          return;
+        }
+
+        var stride = this.rows;
+        var total = response.response.numFound;
+        var currentPage = parseInt(this.currentPage, 10);
+        var range = [];
+
+        if (stride > 0 && total >= 0 && currentPage > 0) {
+          var numPages, upperLimit, start, end;
+
+          numPages = Math.ceil(total / stride);
+          upperLimit = numPages - stride;
+          start = currentPage > 5 ? Math.max(Math.min(currentPage - 5, upperLimit), 0) : 0;
+          end = currentPage > 5 ? Math.min(currentPage + 5, numPages) : Math.min(stride, numPages);
+
+          for (var i = start; i < end; i++) {
+            range.push(i + 1);
+          }
+        }
+
+        this.pageRange = range;
+      }
+    });
+  </script>
+</dom-module>

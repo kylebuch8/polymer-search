@@ -1,0 +1,27 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<dom-module id="psa-constants">
+  <template>
+    <iron-meta key="LANGUAGE" value="{{language}}"></iron-meta>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'psa-constants',
+
+      properties: {
+        language: {
+          type: 'String',
+          value: function () {
+            try {
+              return portal.lang;
+            } catch (e) {
+              return 'en';
+            }
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>
